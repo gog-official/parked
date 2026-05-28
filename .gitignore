@@ -1,0 +1,7 @@
+node_modules/
+backend/data/
+backend/apk-build/build/
+backend/apk-build/app/
+backend/node_modules/
+*.log
+.env

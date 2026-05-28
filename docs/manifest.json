@@ -1,0 +1,13 @@
+{
+  "name": "Parked – Save Your Parking Spot",
+  "short_name": "Parked",
+  "description": "One tap to save where you parked. Share your spot instantly.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

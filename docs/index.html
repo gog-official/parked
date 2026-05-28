@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Parked</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <meta name="theme-color" content="#0F172A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Save your parking spot. Find your car.">
+  <meta property="og:title" content="Parked">
+  <meta property="og:description" content="Someone shared their parking spot with you.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="botbar">
+    <button class="bbtn" id="bb-compass">🧭<span>Compass</span></button>
+    <button class="bbtn" id="bb-share">📤<span>Share</span></button>
+    <button class="bbtn" id="bb-walk">🚶<span>Walk</span></button>
+    <a class="bbtn" href="parked.apk" download="parked.apk">📱<span>APK</span></a>
+  </div>
+  <button id="side-toggle" class="side-toggle">☰</button>
+
+  <div id="sidebar" class="sidebar">
+    <div class="side-head">
+      <button id="save-btn" class="btn btn-primary sm header-park">Park Here</button>
+      <span class="side-logo">Parked</span>
+    </div>
+
+    <div class="side-body">
+
+      <!-- AD PLACEHOLDER 1 (top) — Replace this div with your AdSense code -->
+      <div id="ad-slot-top" class="ad-slot" style="display:none">
+        <!-- Paste your AdSense <ins> tag here -->
+      </div>
+
+      <!-- SECTION: Spot -->
+      <div class="sg">
+        <button class="sg-h" data-sg="spot">
+          <span>Spot</span>
+          <span class="sg-arrow">v</span>
+        </button>
+        <div class="sg-b" id="sg-spot">
+          <div id="save-ui" class="ui active">
+            <p class="save-addr" id="save-addr">Detecting location...</p>
+          </div>
+          <div id="result-ui" class="ui">
+            <div class="res-head">
+              <span class="res-dot"></span>
+              <span id="elapsed" class="res-elapsed"></span>
+            </div>
+            <p class="res-addr" id="result-addr"></p>
+            <div class="sg">
+              <button class="sg-h" data-sg="tools">
+                <span>Tools</span>
+                <span class="sg-arrow">v</span>
+              </button>
+              <div class="sg-b" id="sg-tools">
+                <!-- Garage -->
+                <div class="field-group">
+                  <button id="garage-toggle" class="btn btn-secondary block">Garage Mode</button>
+                  <div id="garage-fields" class="field-body hidden">
+                    <p class="desc">Enter your parking details so you can find your car in a garage or lot.</p>
+                    <div class="grid-2">
+                      <input id="garage-level" type="text" max="10" placeholder="Level / Floor">
+                      <input id="garage-section" type="text" max="10" placeholder="Section / Zone">
+                      <input id="garage-row" type="text" max="10" placeholder="Row / Aisle">
+                      <input id="garage-spot" type="text" max="10" placeholder="Spot #">
+                    </div>
+                    <div id="garage-badge" class="badge hidden"></div>
+                  </div>
+                </div>
+                <!-- Safety -->
+                <div class="field-group">
+                  <button id="safety-btn" class="btn btn-secondary block">Safety Walk</button>
+                  <p class="desc" style="margin-bottom:-2px">Track your walk back to the car — shows distance and direction in real time.</p>
+                  <div id="safety-active" class="field-body hidden">
+                    <div class="safety-bar">
+                      <span class="safety-dot"></span>
+                      <span>Walking to car</span>
+                    </div>
+                    <div class="compass-row" style="padding:6px 0">
+                      <span id="safety-dist">--</span>
+                      <span id="safety-dir">--</span>
+                    </div>
+                    <button id="safety-stop" class="btn btn-danger sm">Stop</button>
+                  </div>
+                </div>
+                <!-- Valet -->
+                <div class="field-group">
+                  <button id="valet-btn" class="btn btn-secondary block">Valet Mode</button>
+                  <p class="desc" style="margin-bottom:-2px">Track how long your car has been with the valet and snap a photo of your ticket.</p>
+                  <div id="valet-active" class="field-body hidden">
+                    <p class="valet-head">With valet - <span id="valet-timer"></span></p>
+                    <div id="valet-photo-wrap" class="hidden">
+                      <img id="valet-img" alt="ticket">
+                    </div>
+                    <button id="valet-ticket-btn" class="btn btn-secondary sm">Snap Ticket</button>
+                    <input id="valet-input" type="file" accept="image/*" capture="environment" hidden>
+                    <button id="valet-call-btn" class="btn btn-primary sm">Call Valet</button>
+                    <button id="valet-end" class="btn btn-danger sm">Got Keys Back</button>
+                  </div>
+                </div>
+                <!-- Cost -->
+                <div class="field-group">
+                  <button id="cost-toggle" class="btn btn-secondary block">Cost Tracker</button>
+                  <p class="desc" style="margin-bottom:-2px">Enter the hourly rate and flat fee to calculate your total parking cost in real time.</p>
+                  <div id="cost-fields" class="field-body hidden">
+                    <div class="row gap-md">
+                      <div class="flex">
+                        <label class="field-label">$/hr</label>
+                        <input id="cost-rate" type="number" min="0" step="0.5" placeholder="0">
+                      </div>
+                      <div class="flex">
+                        <label class="field-label">Flat fee</label>
+                        <input id="cost-flat" type="number" min="0" step="0.5" placeholder="0">
+                      </div>
+                    </div>
+                    <div id="cost-total" class="cost-total hidden">Total: <span id="cost-amount">$0.00</span></div>
+                  </div>
+                </div>
+                <!-- Alt-side -->
+                <div class="field-group">
+                  <button id="alt-toggle" class="btn btn-secondary block">Street Cleaning</button>
+                  <p class="desc" style="margin-bottom:-2px">Set a reminder to move your car before street cleaning starts. Get a notification when time is running out.</p>
+                  <div id="alt-fields" class="field-body hidden">
+                    <div class="row gap-sm" id="alt-presets">
+                      <button class="btn btn-secondary sm flex" data-alt="1">1h</button>
+                      <button class="btn btn-secondary sm flex" data-alt="2">2h</button>
+                      <button class="btn btn-secondary sm flex" data-alt="3">3h</button>
+                      <button class="btn btn-secondary sm flex" data-alt="8">8h</button>
+                      <button class="btn btn-secondary sm flex" data-alt="12">12h</button>
+                    </div>
+                    <div id="alt-active" class="alt-bar hidden">
+                      <span>Reminder - <span id="alt-countdown"></span></span>
+                      <button id="alt-cancel" class="btn btn-danger xs">X</button>
+                    </div>
+                  </div>
+                </div>
+                <!-- Note -->
+                <input id="note-input" type="text" max="80" placeholder="Note (level, row, spot...)" class="field-input">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION: Shared (hidden by default) -->
+      <div id="shared-ui" class="ui">
+        <p class="shared-badge">Shared Spot</p>
+        <p class="res-addr" id="shared-addr"></p>
+        <button id="shared-dir-btn" class="btn btn-primary block">Get Directions</button>
+      </div>
+
+      <!-- SECTION: History -->
+      <div class="sg">
+        <button class="sg-h" data-sg="history">
+          <span>History</span>
+          <span class="sg-arrow">v</span>
+        </button>
+        <div class="sg-b" id="sg-history">
+          <div id="history-list" class="history-list"></div>
+        </div>
+      </div>
+
+      <!-- SECTION: Actions -->
+      <div class="sg">
+        <button class="sg-h" data-sg="actions">
+          <span>Actions</span>
+          <span class="sg-arrow">v</span>
+        </button>
+        <div class="sg-b" id="sg-actions">
+          <button id="dir-btn" class="btn btn-primary block">Walk to Car</button>
+          <button id="share-btn" class="btn btn-primary block">Copy Share Link</button>
+          <button id="compass-btn" class="btn btn-secondary block">Find My Car</button>
+          <div id="compass-result" class="compass-body hidden">
+            <div class="compass-row">
+              <span id="compass-dist"></span>
+              <span id="compass-dir"></span>
+            </div>
+          </div>
+          <button id="clear-btn" class="btn btn-ghost block">Save New Spot</button>
+        </div>
+      </div>
+
+      <!-- AD PLACEHOLDER 2 (bottom) — Replace this div with your AdSense code -->
+      <div id="ad-slot-bottom" class="ad-slot" style="display:none">
+        <!-- Paste your AdSense <ins> tag here -->
+      </div>
+
+      <!-- ERROR -->
+      <div id="error-ui" class="ui">
+        <p class="res-addr" id="error-msg"></p>
+        <button id="retry-btn" class="btn btn-primary block">Retry</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="bg3d"></div>
+  <div id="map"></div>
+  <div id="toast"></div>
+</body>
+</html>
