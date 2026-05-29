@@ -197,8 +197,36 @@ body::after {
 }
 #bg3d canvas { display:block; width:100%; height:100%; }
 
+.tips-block {
+  padding:12px; background:var(--surface2); border:4px solid var(--border);
+  border-left:6px solid var(--orange); margin:10px 0;
+}
+.tips-h { font-size:.82rem; font-weight:900; text-transform:uppercase; margin-bottom:8px; color:var(--orange); }
+.tips-t { font-size:.75rem; color:var(--text2); line-height:1.6; margin-bottom:6px; }
+.tips-t:last-child { margin-bottom:0; }
+
 .ad-slot {
   min-height:90px; display:flex; align-items:center; justify-content:center;
   background:var(--surface2); border:3px dashed var(--border);
   margin:8px 0; overflow:hidden;
+}
+
+.intro-block {
+  padding:12px; background:var(--surface); border:4px solid var(--border);
+  border-left:6px solid var(--cyan); margin-bottom:10px;
+  box-shadow:4px 4px 0 var(--border);
+}
+.intro-tagline {
+  font-size:.85rem; font-weight:700; color:var(--text);
+  line-height:1.5; margin-bottom:10px;
+}
+.intro-steps { display:flex; flex-direction:column; gap:6px; }
+.intro-step {
+  font-size:.78rem; color:var(--text2); display:flex; align-items:center; gap:8px;
+  padding:4px 0; line-height:1.4;
+}
+.intro-num {
+  width:22px; height:22px; display:flex; align-items:center; justify-content:center;
+  background:var(--yellow); border:3px solid var(--border); font-size:.7rem;
+  font-weight:900; flex-shrink:0; box-shadow:2px 2px 0 var(--border);
 }
